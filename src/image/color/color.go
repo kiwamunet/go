@@ -24,18 +24,18 @@ type Color interface {
 // An alpha-premultiplied color component C has been scaled by alpha (A), so
 // has valid values 0 <= C <= A.
 type RGBA struct {
-	R, G, B, A uint8
+	R, G, B, A uint16
 }
 
 func (c RGBA) RGBA() (r, g, b, a uint32) {
 	r = uint32(c.R)
-	r |= r << 8
+	r |= r << 16
 	g = uint32(c.G)
-	g |= g << 8
+	g |= g << 16
 	b = uint32(c.B)
-	b |= b << 8
+	b |= b << 16
 	a = uint32(c.A)
-	a |= a << 8
+	a |= a << 16
 	return
 }
 
@@ -54,24 +54,24 @@ func (c RGBA64) RGBA() (r, g, b, a uint32) {
 
 // NRGBA represents a non-alpha-premultiplied 32-bit color.
 type NRGBA struct {
-	R, G, B, A uint8
+	R, G, B, A uint16
 }
 
 func (c NRGBA) RGBA() (r, g, b, a uint32) {
 	r = uint32(c.R)
-	r |= r << 8
+	r |= r << 16
 	r *= uint32(c.A)
 	r /= 0xff
 	g = uint32(c.G)
-	g |= g << 8
+	g |= g << 16
 	g *= uint32(c.A)
 	g /= 0xff
 	b = uint32(c.B)
-	b |= b << 8
+	b |= b << 16
 	b *= uint32(c.A)
 	b /= 0xff
 	a = uint32(c.A)
-	a |= a << 8
+	a |= a << 16
 	return
 }
 
@@ -97,12 +97,12 @@ func (c NRGBA64) RGBA() (r, g, b, a uint32) {
 
 // Alpha represents an 8-bit alpha color.
 type Alpha struct {
-	A uint8
+	A uint16
 }
 
 func (c Alpha) RGBA() (r, g, b, a uint32) {
 	a = uint32(c.A)
-	a |= a << 8
+	a |= a << 16
 	return a, a, a, a
 }
 
@@ -118,12 +118,12 @@ func (c Alpha16) RGBA() (r, g, b, a uint32) {
 
 // Gray represents an 8-bit grayscale color.
 type Gray struct {
-	Y uint8
+	Y uint16
 }
 
 func (c Gray) RGBA() (r, g, b, a uint32) {
 	y := uint32(c.Y)
-	y |= y << 8
+	y |= y << 16
 	return y, y, y, 0xffff
 }
 
@@ -178,7 +178,7 @@ func rgbaModel(c Color) Color {
 		return c
 	}
 	r, g, b, a := c.RGBA()
-	return RGBA{uint8(r >> 8), uint8(g >> 8), uint8(b >> 8), uint8(a >> 8)}
+	return RGBA{uint16(r >> 16), uint16(g >> 16), uint16(b >> 16), uint16(a >> 16)}
 }
 
 func rgba64Model(c Color) Color {
@@ -195,7 +195,7 @@ func nrgbaModel(c Color) Color {
 	}
 	r, g, b, a := c.RGBA()
 	if a == 0xffff {
-		return NRGBA{uint8(r >> 8), uint8(g >> 8), uint8(b >> 8), 0xff}
+		return NRGBA{uint16(r >> 16), uint16(g >> 16), uint16(b >> 16), 0xff}
 	}
 	if a == 0 {
 		return NRGBA{0, 0, 0, 0}
@@ -204,7 +204,7 @@ func nrgbaModel(c Color) Color {
 	r = (r * 0xffff) / a
 	g = (g * 0xffff) / a
 	b = (b * 0xffff) / a
-	return NRGBA{uint8(r >> 8), uint8(g >> 8), uint8(b >> 8), uint8(a >> 8)}
+	return NRGBA{uint16(r >> 16), uint16(g >> 16), uint16(b >> 16), uint16(a >> 16)}
 }
 
 func nrgba64Model(c Color) Color {
@@ -230,7 +230,7 @@ func alphaModel(c Color) Color {
 		return c
 	}
 	_, _, _, a := c.RGBA()
-	return Alpha{uint8(a >> 8)}
+	return Alpha{uint16(a >> 16)}
 }
 
 func alpha16Model(c Color) Color {
@@ -247,7 +247,7 @@ func grayModel(c Color) Color {
 	}
 	r, g, b, _ := c.RGBA()
 	y := (299*r + 587*g + 114*b + 500) / 1000
-	return Gray{uint8(y >> 8)}
+	return Gray{uint16(y >> 16)}
 }
 
 func gray16Model(c Color) Color {
